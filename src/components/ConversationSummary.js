@@ -6,8 +6,7 @@ import { Box } from '@twilio-paste/box';
 import {Grid, Column } from '@twilio-paste/core/grid'
 import { Heading } from '@twilio-paste/heading';
 import { Paragraph } from '@twilio-paste/paragraph';
-
-import { getConverstationSummary } from "../helpers/GetConversationSummary";
+import { withTaskContext } from '@twilio/flex-ui';
 
 
 const styles = {
@@ -17,9 +16,8 @@ const styles = {
 }
 
 const ConversationSummary = (props) => {
-
     const [message, setMessage] = useState('There is no summary available yet as the agent is about to start a conversation with the customer');
-
+    const task = props.task
     /*
     This is where you will make a fetch call to your serverless function (sample function found in the serverless-functions
     folder in this repository). 
@@ -29,20 +27,36 @@ const ConversationSummary = (props) => {
     */
 
     
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     const getSummary = async () => {
-    //         console.log('getSummary')
-    //         let result = await getConverstationSummary()
-    //     }
+        const getSummary = async () => {
+            //const { task } = this.props;
+            //console.log(task);
+            const callSid = task.attributes.call_sid;
+            const mapKey = "Summary-" + callSid;
+            console.log("fetching summary for :", mapKey);
+            // let result = callSid;
+            
+            const body = { map: mapKey };
 
-    //     getSummary()
+            // Set up the HTTP options for your request
+            const options = {
+                method: 'POST',
+                body: new URLSearchParams(body),
+                headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                }
+            };
 
-    //     // fetch('https://your-serverless-function-url.com')
-    //     //   .then(response => response.json())
-    //     //   .then(data => setMessage(data.message))
-    //     //   .catch(error => console.error('Error:', error));
-    //   }, []);
+            // Make the network request using the Fetch API
+            fetch('https://getdocument-9003.twil.io/getDocument', options)
+                .then(resp => resp.json())
+                .then(data => setMessage(data));
+            }
+
+        getSummary()
+
+      }, []);
     
 
     let layout = (
@@ -70,4 +84,4 @@ const ConversationSummary = (props) => {
     )
     return layout
 }
-export default ConversationSummary;
+export default withTaskContext(ConversationSummary);

@@ -50,8 +50,8 @@ const RetailView = (props) => {
                     {/* Customer Details Panel Here */}
                     <TabPanel>
                         <Grid gutter="space30">
-                                <Column span={4}><ContactCard /></Column>
-                                {/* <Column span={8}><ConversationSummary /></Column> */}
+                                {/* <Column span={4}><ContactCard /></Column> */}
+                                <Column span={8}><ConversationSummary /></Column>
                                 <Column span={8}>
                                     <Tabs baseId="conversations">
                                         <TabList aria-label="details-tab">

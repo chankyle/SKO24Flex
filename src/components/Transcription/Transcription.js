@@ -38,7 +38,7 @@ const styles = {
     },
     scrollTranscript: {
       width: '100%',
-      height: 300,
+      height: 700,
       overflowY: 'scroll',
       border: '1px solid #ececec',
       borderRadius: 5,
@@ -65,20 +65,60 @@ console.log('main props')
           console.log('Using this CallSid for stream connection:', callSid);
     
           try {
-            client.stream('FLEX_ASSIST_' + callSid).then((stream) => {
-              setLoading(false);
-              console.log('Access to stream:', stream);
-              stream.on('messagePublished', (event) => {
-                const words = event?.message?.data.text;
-                console.log(`Speech server (${event.message.data.track}) >> `, words);
-                if (event?.message?.data.isFinal == true) {
-                  console.log('Adding to transcript', words);
-                  setTranscript((transcript) => [...transcript, { message: words, direction: event.message.data.track }]);
-                } else {
-                  setIntermediateResult(words);
-                }
-              });
-            });
+
+            const getTranscript = async () => {
+              const listKey = "Transcript-" + callSid;
+              console.log("fetching summary for :", listKey);
+              
+              const body = { list: listKey };
+  
+              // Set up the HTTP options for your request
+              const options = {
+                  method: 'POST',
+                  body: new URLSearchParams(body),
+                  headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                  }
+              };
+  
+              // Make the network request using the Fetch API
+              fetch('https://getdocument-9003.twil.io/getTranscript', options)
+                  .then(resp => resp.json())
+                  .then(listItems => {
+                    let newDirection = "";
+                    console.log(listItems);
+                    setLoading(false);
+                    for (let i = 0; i < listItems.length; i++){
+                      console.log(listItems[i].data)
+                      if (listItems[i].data.speaker == 'customer') {
+                        newDirection = 'inbound'
+                      } else{
+                        newDirection = 'outbound'
+                      }
+                      setTranscript((transcript) => [...transcript, { message: listItems[i].data.transcript, direction: newDirection}]);
+                      console.log(transcript);
+                    }
+                    console.log(transcript);
+                  });
+              }
+  
+          getTranscript();
+
+
+            // client.stream('FLEX_ASSIST_' + callSid).then((stream) => {
+            //   setLoading(false);
+            //   console.log('Access to stream:', stream);
+            //   stream.on('messagePublished', (event) => {
+            //     const words = event?.message?.data.text;
+            //     console.log(`Speech server (${event.message.data.track}) >> `, words);
+            //     if (event?.message?.data.isFinal == true) {
+            //       console.log('Adding to transcript', words);
+            //       setTranscript((transcript) => [...transcript, { message: words, direction: event.message.data.track }]);
+            //     } else {
+            //       setIntermediateResult(words);
+            //     }
+            //   });
+            // });
           } catch (error) {
             console.error('RVS: Unable to subscribe to Sync stream', error);
           }
@@ -102,7 +142,7 @@ console.log('main props')
 
           <Box width={'100%'} overflow="scroll" inset={undefined} padding={'space40'} backgroundColor={'colorBackgroundBody'}>
               <Stack orientation={'vertical'} spacing={'space40'}>
-                <>
+                {/* <>
                   <Label htmlFor="caller_text" required>
                     Call (real-time) transcript
                   </Label>
@@ -120,7 +160,7 @@ console.log('main props')
                   />
                 </>
 
-                <AiSuggestion transcript={transcript} />
+                <AiSuggestion transcript={transcript} /> */}
 
                 <div style={styles.scrollTranscript}>
                 <ChatLog>
