@@ -38,7 +38,7 @@ const styles = {
     },
     scrollTranscript: {
       width: '100%',
-      height: 700,
+      height: 415,
       overflowY: 'scroll',
       border: '1px solid #ececec',
       borderRadius: 5,
